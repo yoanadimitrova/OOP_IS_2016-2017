@@ -17,8 +17,8 @@ public:
     const int getAt(int index)const;//
     void setAt(int index, int element);//
     bool isEmpty();//
-    void add(int element);
-    void remove(int element);
+    void add(int element); //
+    void remove(int element); //
     void sort(bool increasing);
     bool isSorted(bool increasing);
     Vector& operator+=(const Vector& other);//
