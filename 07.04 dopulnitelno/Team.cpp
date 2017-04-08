@@ -39,7 +39,7 @@ Team::Team(const Team& other)
 
 Team& Team::operator=(const Team& rhs)
 {
-    if (this == &rhs) return *this; // handle self assignment
+    if (this == &rhs) return *this;
 
     Setname(rhs.name);
     Setbudget(rhs.budget);
