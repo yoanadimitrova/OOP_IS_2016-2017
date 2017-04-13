@@ -107,7 +107,7 @@ void String::concat(const String& other)
 //Preddefinirane na operatori:
 bool String::operator==(const String& lhs)
 {
-    return strcmp(this->data, lhs.data) == 0; // ==0, zashtoto ako sa ravni
+    return strcmp(this->data, lhs.data) == 0;
 }
 bool String::operator!=(const String& rhs)
 {
@@ -147,7 +147,7 @@ String& String::operator-=(const String& rhs)
     result [strlen(result) - rhsSize] = '\0';
     return *this;
 }
- std::ostream& operator>>(std::ostream& os, String& obj) //chast ot klasa i ne se pishat ::
+ std::ostream& operator>>(std::ostream& os, String& obj)
  {
     os << "fdgjk" << endl;
     os << obj.data << endl;
