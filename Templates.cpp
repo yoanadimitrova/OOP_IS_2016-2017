@@ -11,7 +11,7 @@ T getMax(T a, T b)
 }
 
 void swap (int& a, int& b);
-template <typename T> //nqma znachenie dali e class ili typename
+template <typename T>
 void swap_t(T& a, T& b)
 {
     T temp = a;
