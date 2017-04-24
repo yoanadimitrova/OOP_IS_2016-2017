@@ -124,13 +124,13 @@ void BigInt::concat(const BigInt& other)
 }
 
 //Redefinition of operators:
-BigInt& BigInt::operator=(const BigInt& rhs) // Оперататор за присвояване, който приема като десен аргумент обект от тип BigInt
+BigInt& BigInt::operator=(const BigInt& rhs)
 {
     //number = rhs.number;
     bigNumber = rhs.bigNumber;
     return *this;
 }
-BigInt& BigInt::operator=(int rhs) // Оперататор за присвояване, който приема като десен аргумент обект цяло число
+BigInt& BigInt::operator=(int rhs) 
 {
     number = rhs;
     return *this;
@@ -141,16 +141,16 @@ BigInt& BigInt::operator+=(const BigInt& rhs)
     return *this;
 }
 
-const BigInt BigInt::operator+(const BigInt& rhs) // Оператор +
+const BigInt BigInt::operator+(const BigInt& rhs)
 {
     return BigInt (this -> number, this -> bigNumber) += rhs;
 }
-BigInt& BigInt::operator++() // Префиксен оператор
+BigInt& BigInt::operator++()
 {
     *this += BigInt (1, "18446744073");
     return *this;
 }
-const BigInt& BigInt::operator++(int) // Постфиксен оператор
+const BigInt& BigInt::operator++(int)
 {
     BigInt copy (this -> number, this -> bigNumber);
     ++(*this);
@@ -172,12 +172,12 @@ const BigInt& BigInt::operator-(const BigInt& rhs)
 {
     return BigInt (this -> number, this -> bigNumber) -= rhs;
 }
-BigInt& BigInt::operator--() // Префиксен оператор --
+BigInt& BigInt::operator--()
 {
     *this -= BigInt (1, "18446744073");
     return *this;
 }
-const BigInt& BigInt::operator--(int)// Постфиксен оператор --
+const BigInt& BigInt::operator--(int)
 {
     BigInt copy (this -> number, this -> bigNumber);
     --(*this);
