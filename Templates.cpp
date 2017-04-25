@@ -62,4 +62,20 @@ void Copy (T* source, T*& destination, int len)
         }
     }
 }
+template<typename T>
+inline T max(T lhs, T rhs) // int
+{
+    return lhs > rhs ? lhs : rhs;
+}
+
+template<typename T>
+T biggest(const T* source, size_t size)
+{
+    T ret = source[0];
+    for (size_t i = 1; i < size; i++)
+    {
+        ret = max(source[i], ret);
+    }
+    return ret;
+}
 */
