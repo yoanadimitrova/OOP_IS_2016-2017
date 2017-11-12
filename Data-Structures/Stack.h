@@ -32,7 +32,6 @@ public:
     const T& top() const;
     size_t GetSize() const;
     T& peek();
-    // friend std::ostream& operator<<(std::ostream& out, const Stack<T>& rhs);
 
 private:
     Element* topElem; // Pointer to the element on the top of the stack
