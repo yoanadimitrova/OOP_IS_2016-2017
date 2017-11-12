@@ -1,163 +1,202 @@
-#include <iostream>
+#pragma once
 
-using namespace std;
+#ifndef LINKEDSTACK_H // Checks if LINKEDSTACK_H is defined
+#define LINKEDSTACK_H // If not - it defines it
 
-template<typename T>
-struct Node
-{
-    T data; // int, double, customClass
-    Node<T>*  next; // sochi kum nullptr ako nqmame elementi; sochi kum sledvashtiq elem
-
-    Node(const T& _data, Node<T>* _next = nullptr) // moje i T _data, no const T& _data ni osigurqva, che nqma da go promenim
-    {
-        //Google why const reference
-        data = _data;
-        next = _next;
-    }
-};
+// Main operation needed for stack: push, pop, isEmpty
 
 template<typename T>
 class Stack
 {
+    struct Element
+    {
+        T data;
+        Element* nextElem;
+        Element(const T& other)
+        {
+            data = other;
+            nextElem = 0;
+        }
+    };
+
 public:
-    // vupreki, che ne e dinamechno pak si pravim 4-kata
     Stack();
-    Stack(const Stack&);
-    Stack operator=(const Stack&);
+    Stack(const Stack& other);
+    Stack& operator=(const Stack& other);
     ~Stack();
 
-    T pop(); // vrushta dannite v nachaloto
-    T top() const;
-    void push(const T& data);
-    size_t len() const; // vrushta razmera // const zashtot ne promenqme nishto
+    void init();
     bool isEmpty() const;
+    void pop();
+    void push(const T& newElem);
+    const T& top() const;
+    size_t GetSize() const;
+    T& peek();
+    // friend std::ostream& operator<<(std::ostream& out, const Stack<T>& rhs);
 
 private:
-    Node<T>* first; // ukazatel kum 1-viq elem
-    void copyReverse(const Stack&);
-    size_t size;
-    void copy(const Stack&);
-    void init();
-    void empty();
+    Element* topElem; // Pointer to the element on the top of the stack
+    int used;
+
+    void destroy();
+    void copyFrom(Stack const& other);
 };
 
+// Creates an empty stack
 template<typename T>
-T Stack<T>::pop()
+Stack<T>::Stack()
 {
-    if(isEmpty())
-    {
-        Node<T>* temp = first; // temp i first sa edno neshto; pazim stoinostta na first v temp
-        T data = temp -> data;
-        first = first -> next; // poitera veche ne sochi kum purviq,a kum sledvashtiq
-        delete temp; // iztrivame tozi, koito e bil predhoden; taka nqma memory leak
-        this -> size--; // moje i samo size--;
-        return data; // vrushtame novata stoinost
-    }
-    else
-    {
-        cout << "Empty stack." << endl;
-        return NULL;
-    }
-
+    init();
 }
 
-/*
-// ako e void pop()
+// Copy constructor
 template<typename T>
-void Stack<T>::pop()
+Stack<T>::Stack(const Stack& other)
 {
-    if(isEmpty())
+    init();
+    copyFrom(other);
+}
+
+// Operator =
+template<typename T>
+Stack<T>& Stack<T>::operator=(const Stack& other)
+{
+    if(this != &other)
     {
-        Node<T>* temp = first; // temp i first sa edno neshto; pazim stoinostta na first v temp
-        first = first -> next; // poitera veche ne sochi kum purviq,a kum sledvashtiq
-        delete temp; // iztrivame tozi, koito e bil predhoden; taka nqma memory leak
-        this -> size--;
+        destroy(); // First we free the currently allocated memory
+        copyFrom(other); // Then we copy
+
     }
-    else
-    {
-        cout << "Empty stack." << endl;
-    }
+    return *this;
 }
-*/
 
+// Destructor
 template<typename T>
-T Stack<T>::top() const
+Stack<T>::~Stack()
 {
-    if(!isEmpty())
-    {
-        return first -> data;
-    }
-    // ne pishem else za da moje da stigne do vtoriq return
-    return NULL;
+    destroy();
 }
 
-template<typename T>
-void Stack<T>::push(const T& data)
-{
-    Node<T>* add = new Node(data,  this -> first);
-    // Node<T>* add; // iskame ukazatel kum Node; nov node
-    // add -> data = data;
-    // add -> next = this -> first;
-
-    if(add)
-    {
-        this -> first = add;
-        this -> size++;
-    }
-}
-
-template<typename T>
-size_t Stack<T>::len() const
-{
-    return this -> size;
-}
-
-template<typename T>
-void Stack<T>::isEmpty()
-{
-    return this -> first == nullptr; // ili return this -> size == 0;
-}
-
-template<typename T>
-void Stack<T>::copyReverse(const Stack& st) // kopirame steka no naobratno i taka posledniqt elem stava 1-vi
-{
-    is(!isEmpty())
-    {
-        this -> empty();
-    }
-
-    Node<T>* temp = st -> first; // temp sochi kum 1-viq elem
-    for(size_t i = 0; i < st.len(); i++)
-    {
-        this -> push(temp->data);
-        temp = temp -> next;
-    }
-}
-
-template<typename T>
-void Stack<T>::copy(const Stack& st) // 1 -> 2 -> 3 -> 4
-{
-    Stack<T> reverse; // pravim empty stack
-    reverse.copyReverse(st); // 4 -> 3 -> 2 -> 1
-    this -> copyReverse(reverse); // 1 -> 2 -> 3 -> 4
-}
-
+// Assigning initial values for the data-members of the object
+// The values are proper for an empty stack
 template<typename T>
 void Stack<T>::init()
 {
-    this -> first == nullptr;
-    this -> size = 0;
+    this -> topElem = 0;
+    this -> used = 0;
 }
 
+// Checks if the stack is empty
 template<typename T>
-void Stack<T>::empty()
+bool Stack<T>::isEmpty() const
 {
-    size_t sizeOne = this -> size;
-    for(size_t i = 0; i < sizeOne; i++)
-    {
-        // za void pop
-        // cout <<  this -> top() << endl;
-        // this -> pop();
-        this -> pop();
-    }
+    return topElem == 0;
 }
+
+// Removes and returns the element on top of the stack
+template<typename T>
+void Stack<T>::pop()
+{
+    if(!isEmpty())
+    {
+        T& nextElem;
+        nextElem = topElem -> nextElem;
+        delete topElem;
+        topElem = nextElem;
+        used--;
+
+        /*Element *newData = topElem;
+        topElem = topElem -> nextElem; // If the stack is empty there will be error
+        T data = newData -> data; // We make an extra copy of the item
+        delete newData; // Deleting the old data
+        return data;*/
+    }
+    else
+        return 0; // If the stack is empty
+}
+
+// Adds an element on the top if the stack
+template<typename T>
+void Stack<T>::push(const T& newElem) // newElement is the value to which the inserted element is initialized
+{
+    // One line solution:
+    // topElem = new Element(newElem, topElem);
+
+    Element* pushElem = new Element(newElem);
+    pushElem -> nextElem = topElem;
+    topElem = pushElem;
+    used++;
+}
+
+// Empties the stack and frees the allocated memory
+template<typename T>
+void Stack<T>::destroy()
+{
+    Element* junk; // Variable to save the data to be deleted
+
+    while(topElem)
+    {
+        junk = topElem;
+        topElem = topElem -> nextElem;
+        delete junk;
+    }
+    init();
+}
+
+// Accesses the next element and returns a reference to the top element (the last element inserted) in the stack
+template<typename T>
+const T& Stack<T>::top() const
+{
+    if(isEmpty())
+        return 0; // topElem is nullptr
+    return topElem -> data;
+    // return data[topElem - 1];
+}
+
+// Makes the current object a copy of another one
+template<typename T>
+void Stack<T>::copyFrom(Stack const& other)
+{   // The object to copy from can be either empty or non-empty, so we check it if it is empty
+    if(other.isEmpty())
+        return;
+
+    //Element<T> *orig, *reversed;
+    T *orig, *reversed;
+
+    topElem = new Element(other.topElem -> data);
+
+    orig = topElem;
+    reversed = other.topElem -> nextElem;
+
+		while (reversed)
+		{
+			orig -> nextElem = new Element(reversed -> data);
+			orig = orig -> nextElem;
+			reversed = reversed -> nextElem;
+		}
+
+		used = other.used;
+
+		destroy();
+}
+
+// Returns the number of elements currently stored in the stack
+template<typename T>
+size_t Stack<T>::GetSize() const
+{
+    return used;
+}
+
+// Peek next character
+// Returns the next character in the input sequence (as a value of type int), without extracting it: The character is left as 
+// the next character to be extracted from the stream.
+template<typename T>
+T& Stack<T>::peek()
+{
+	if(used == 0)
+        return topElem -> data;
+    else
+        return 1;
+}
+
+#endif // LINKEDSTACK_H
