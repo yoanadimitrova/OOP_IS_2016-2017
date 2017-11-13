@@ -1,59 +1,56 @@
 #pragma once
 
-#ifndef LINKEDSTACK_H // Checks if LINKEDSTACK_H is defined
-#define LINKEDSTACK_H // If not - it defines it
+template<typename T>
+struct Element
+{
+    T data;
+    Element<T>* nextElem;
+    Element(const T& other, Element<T>* _nextElem = nullptr)
+    {
+        data = other;
+        nextElem = _nextElem;
+    }
+};
 
-// Main operation needed for stack: push, pop, isEmpty
 
 template<typename T>
 class Stack
 {
-    struct Element
-    {
-        T data;
-        Element* nextElem;
-        Element(const T& other)
-        {
-            data = other;
-            nextElem = 0;
-        }
-    };
-
 public:
     Stack();
     Stack(const Stack& other);
     Stack& operator=(const Stack& other);
     ~Stack();
 
-    void init();
-    bool isEmpty() const;
-    void pop();
+    T pop();
+    T top() const;
     void push(const T& newElem);
-    const T& top() const;
-    size_t GetSize() const;
-    T& peek();
+    size_t len() const;
+    bool isEmpty() const;
+
 
 private:
-    Element* topElem; // Pointer to the element on the top of the stack
-    int used;
-
+    Element<T>* topElem; // Pointer to the top element of the stack
+    size_t size;
+    void reversedElemCopy(const Stack& stackElem); // Copies the stack but the elements in it are reversed
+    void copy(const Stack& other);
+    void init();
     void destroy();
-    void copyFrom(Stack const& other);
 };
 
 // Creates an empty stack
 template<typename T>
 Stack<T>::Stack()
 {
-    init();
+    this -> init();
 }
 
 // Copy constructor
 template<typename T>
 Stack<T>::Stack(const Stack& other)
 {
-    init();
-    copyFrom(other);
+    this -> init();
+    this -> copy(other);
 }
 
 // Operator =
@@ -62,8 +59,8 @@ Stack<T>& Stack<T>::operator=(const Stack& other)
 {
     if(this != &other)
     {
-        destroy(); // First we free the currently allocated memory
-        copyFrom(other); // Then we copy
+        this -> destroy(); // First we free the currently allocated memory
+        this -> copy(other); // Then we copy
 
     }
     return *this;
@@ -73,45 +70,35 @@ Stack<T>& Stack<T>::operator=(const Stack& other)
 template<typename T>
 Stack<T>::~Stack()
 {
-    destroy();
-}
-
-// Assigning initial values for the data-members of the object
-// The values are proper for an empty stack
-template<typename T>
-void Stack<T>::init()
-{
-    this -> topElem = 0;
-    this -> used = 0;
-}
-
-// Checks if the stack is empty
-template<typename T>
-bool Stack<T>::isEmpty() const
-{
-    return topElem == 0;
+    this -> destroy();
 }
 
 // Removes and returns the element on top of the stack
 template<typename T>
-void Stack<T>::pop()
+T Stack<T>::pop()
 {
     if(!isEmpty())
     {
-        T& nextElem;
-        nextElem = topElem -> nextElem;
-        delete topElem;
-        topElem = nextElem;
-        used--;
-
-        /*Element *newData = topElem;
-        topElem = topElem -> nextElem; // If the stack is empty there will be error
-        T data = newData -> data; // We make an extra copy of the item
-        delete newData; // Deleting the old data
-        return data;*/
+        Element<T>* temp = topElem; // We keep the value of topElem in temp
+        T data = temp -> data;
+        topElem = topElem -> nextElem; // Points the next element; If the stack is empty there will be an error if we haven't check if the stack is !isEmpty
+        delete temp; // Delete the previous element so we prevent from memory leak
+        this -> size--;
+        return data; // We return the new value
     }
     else
         return 0; // If the stack is empty
+}
+
+// Accesses the next element and returns a reference to the top element (the last element inserted) in the stack
+template<typename T>
+T Stack<T>::top() const
+{
+    if(!isEmpty())
+    {
+        return topElem -> data;
+    }
+    return nullptr;
 }
 
 // Adds an element on the top if the stack
@@ -121,17 +108,70 @@ void Stack<T>::push(const T& newElem) // newElement is the value to which the in
     // One line solution:
     // topElem = new Element(newElem, topElem);
 
-    Element* pushElem = new Element(newElem);
-    pushElem -> nextElem = topElem;
-    topElem = pushElem;
-    used++;
+    Element<T>* addElem; // Pointer to Element
+    addElem -> newElem = newElem;
+    addElem -> nextElem = this -> topElem;
+
+    if(addElem)
+    {
+        this -> topElem = addElem;
+        this -> size++;
+    }
+}
+
+// Returns the number of elements currently stored in the stack
+template<typename T>
+size_t Stack<T>::len() const
+{
+    return this -> size;
+}
+
+// Checks if the stack is empty
+template<typename T>
+bool Stack<T>::isEmpty() const
+{
+    return this -> topElem == nullptr;
+}
+
+// Copies the stack but the elements in it are reversed
+template<typename T>
+void Stack<T>::reversedElemCopy(const Stack& stackElem)
+{
+    if(!isEmpty())
+    {
+        Element<T>* temp = stackElem -> topElem; // temp point at the first element
+        for(size_t i = 0; i < stackElem.len(); i++)
+        {
+            this -> push(temp -> data);
+            temp = temp -> next;
+        }
+    }
+    this -> destroy();
+}
+
+// Makes the current object a copy of another one
+template<typename T>
+void Stack<T>::copy(Stack const& other)
+{
+    Stack<T> reversedStack; // Empty stack to save the Stack' elements in the right order
+    reversedStack.reversedElemCopy(other); // We save the 'wrong' reversed elements from other to reversedStack
+    this -> reversedElemCopy(reversedStack); // This is the stack with the right order of elements
+}
+
+// Assigning initial values for the data-members of the object
+// The values are proper for an empty stack
+template<typename T>
+void Stack<T>::init()
+{
+    this -> topElem = nullptr;
+    this -> size = 0;
 }
 
 // Empties the stack and frees the allocated memory
 template<typename T>
 void Stack<T>::destroy()
 {
-    Element* junk; // Variable to save the data to be deleted
+    Element<T>* junk; // Variable to save the data to be deleted
 
     while(topElem)
     {
@@ -139,63 +179,5 @@ void Stack<T>::destroy()
         topElem = topElem -> nextElem;
         delete junk;
     }
-    init();
+    pop();
 }
-
-// Accesses the next element and returns a reference to the top element (the last element inserted) in the stack
-template<typename T>
-const T& Stack<T>::top() const
-{
-    if(isEmpty())
-        return 0; // topElem is nullptr
-    return topElem -> data;
-    // return data[topElem - 1];
-}
-
-// Makes the current object a copy of another one
-template<typename T>
-void Stack<T>::copyFrom(Stack const& other)
-{   // The object to copy from can be either empty or non-empty, so we check it if it is empty
-    if(other.isEmpty())
-        return;
-
-    //Element<T> *orig, *reversed;
-    T *orig, *reversed;
-
-    topElem = new Element(other.topElem -> data);
-
-    orig = topElem;
-    reversed = other.topElem -> nextElem;
-
-		while (reversed)
-		{
-			orig -> nextElem = new Element(reversed -> data);
-			orig = orig -> nextElem;
-			reversed = reversed -> nextElem;
-		}
-
-		used = other.used;
-
-		destroy();
-}
-
-// Returns the number of elements currently stored in the stack
-template<typename T>
-size_t Stack<T>::GetSize() const
-{
-    return used;
-}
-
-// Peek next character
-// Returns the next character in the input sequence (as a value of type int), without extracting it: The character is left as 
-// the next character to be extracted from the stream.
-template<typename T>
-T& Stack<T>::peek()
-{
-	if(used == 0)
-        return topElem -> data;
-    else
-        return 1;
-}
-
-#endif // LINKEDSTACK_H
